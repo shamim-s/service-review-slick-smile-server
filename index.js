@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -14,7 +14,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
         const servicesCollection = client.db('slickSmileDB').collection('services');
-        const reviewCollection = client.db('slickSmileDB').collection('review');
+        const reviewCollection = client.db('slickSmileDB').collection('reviews');
 
     // get 3 services data for home page 
             app.get('/services', async(req, res) => {
@@ -23,7 +23,7 @@ async function run(){
                 const result = await cursor.limit(3).toArray();
                 res.send(result);
             })
-            
+
     // get all services data for all services page 
         app.get('/services/all', async(req, res) => {
             const query = {};
@@ -31,6 +31,16 @@ async function run(){
             const result = await cursor.toArray();
             res.send(result);
         })
+
+    // getting e single service with id 
+        app.get('/services/all/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await servicesCollection.findOne(query);
+            res.send(result);
+        })
+
+    
     }
     finally{
 
