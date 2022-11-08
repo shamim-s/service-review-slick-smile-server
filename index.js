@@ -15,6 +15,13 @@ async function run(){
     try{
         const servicesCollection = client.db('slickSmileDB').collection('services');
         const reviewCollection = client.db('slickSmileDB').collection('reviews');
+        
+    // Post method for submit reviews
+        app.post('/reviews/add', async(req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        })
 
     // get 3 services data for home page 
             app.get('/services', async(req, res) => {
