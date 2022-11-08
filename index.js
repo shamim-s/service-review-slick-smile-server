@@ -16,11 +16,19 @@ async function run(){
         const servicesCollection = client.db('slickSmileDB').collection('services');
         const reviewCollection = client.db('slickSmileDB').collection('review');
 
-// get 3 services data for home page 
-        app.get('/services', async(req, res) => {
+    // get 3 services data for home page 
+            app.get('/services', async(req, res) => {
+                const query = {};
+                const cursor = servicesCollection.find(query);
+                const result = await cursor.limit(3).toArray();
+                res.send(result);
+            })
+            
+    // get all services data for all services page 
+        app.get('/services/all', async(req, res) => {
             const query = {};
             const cursor = servicesCollection.find(query);
-            const result = await cursor.limit(3).toArray();
+            const result = await cursor.toArray();
             res.send(result);
         })
     }
