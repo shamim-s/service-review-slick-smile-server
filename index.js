@@ -40,7 +40,18 @@ async function run(){
             res.send(result);
         })
 
-    
+    //geting each service review
+        app.get('/reviews', async(req, res) => {
+            let query = {};
+            if(req.query.name){
+                query ={
+                    name: req.query.name
+                }
+            }
+            const cursor = reviewCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
     }
     finally{
 
