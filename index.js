@@ -1,15 +1,32 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+// Middleware 
 app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@cluster0.zn49gp5.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+function verifyJWT(req, res, next){
+    const authHeader = req.headers.authorization;
+    if(!authHeader){
+        return res.status(401).send({message: 'unauthorized access'});
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_SECRET, function(err, decoded){
+        if(err){
+            return res.status(401).send({message: 'unauthorized access'});
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
 
 async function run(){
     try{
@@ -28,6 +45,13 @@ async function run(){
             const service = req.body;
             const result = await servicesCollection.insertOne(service);
             res.send(result);
+        })
+
+    //Jwt verify
+        app.post('/jwt', (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_SECRET, {expiresIn: '1h'});
+            res.send({token});
         })
 
     // get 3 services data for home page 
@@ -68,7 +92,12 @@ async function run(){
         })
 
     //get my review based on user email
-        app.get('/myreview', async(req, res) => {
+        app.get('/myreview',verifyJWT, async(req, res) => {
+            const decoded = req.decoded;
+            if(decoded.email !== req.query.email){
+               return res.status(403).send({message: 'Forbiden access'});
+            }
+            
             let query = {};
             if(req.query.email){
                 query = {
@@ -87,7 +116,7 @@ async function run(){
             const result = await reviewCollection.findOne(query);
             res.send(result);
         })
-        
+
     //Update review
         app.put('/reviews/:id', async(req, res) => {
             const id = req.params.id;
