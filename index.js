@@ -15,7 +15,7 @@ async function run(){
     try{
         const servicesCollection = client.db('slickSmileDB').collection('services');
         const reviewCollection = client.db('slickSmileDB').collection('reviews');
-        
+
     // Post method for submit reviews
         app.post('/reviews/add', async(req, res) => {
             const review = req.body;
@@ -53,6 +53,19 @@ async function run(){
             if(req.query.name){
                 query ={
                     name: req.query.name
+                }
+            }
+            const cursor = reviewCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+    //get my review based on user email
+        app.get('/myreview', async(req, res) => {
+            let query = {};
+            if(req.query.email){
+                query = {
+                    email: req.query.email
                 }
             }
             const cursor = reviewCollection.find(query);
