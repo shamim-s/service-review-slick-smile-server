@@ -23,6 +23,13 @@ async function run(){
             res.send(result);
         })
 
+    // add a new service from client side
+        app.post('/addservice', async(req, res) => {
+            const service = req.body;
+            const result = await servicesCollection.insertOne(service);
+            res.send(result);
+        })
+
     // get 3 services data for home page 
             app.get('/services', async(req, res) => {
                 const query = {};
