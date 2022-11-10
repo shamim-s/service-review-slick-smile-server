@@ -86,7 +86,7 @@ async function run(){
                     name: req.query.name
                 }
             }
-            const cursor = reviewCollection.find(query);
+            const cursor = reviewCollection.find(query).sort({time: -1});
             const result = await cursor.toArray();
             res.send(result);
         })
@@ -97,7 +97,7 @@ async function run(){
             if(decoded.email !== req.query.email){
                return res.status(403).send({message: 'Forbiden access'});
             }
-            
+
             let query = {};
             if(req.query.email){
                 query = {
